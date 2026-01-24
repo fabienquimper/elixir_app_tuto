@@ -72,7 +72,7 @@ defmodule MyApp.Post do
     timeline
     |> Timeline.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:timeline_created)
+    |> broadcast(:timeline_updated)
   end
 
   def subscribe do
@@ -83,6 +83,8 @@ defmodule MyApp.Post do
     Phoenix.PubSub.broadcast(MyApp.PubSub, "timelines", {event, timeline})
     {:ok, timeline}
   end
+
+  defp broadcast({:error, _} = error, _event), do: error
 
   @doc """
   Deletes a timeline.
@@ -98,8 +100,10 @@ defmodule MyApp.Post do
   """
   def delete_timeline(%Timeline{} = timeline) do
     Repo.delete(timeline)
-    |> broadcast(:timeline_created) # On change l'atome ici
+    |> broadcast(:timeline_deleted) # On change l'atome ici
   end
+
+
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking timeline changes.

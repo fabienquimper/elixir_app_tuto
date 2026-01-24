@@ -51,14 +51,24 @@ defmodule MyAppWeb.TimelineLive.Index do
     {:noreply, stream_delete(socket, :post, timeline)}
   end
 
+  # Cas 1 : Nouveau post (Déjà fait)
   @impl true
   def handle_info({:timeline_created, timeline}, socket) do
-      # {:noreply, stream_insert(socket, :post, timeline, at: 0)}
-    # {:noreply, update(socket, :posts, fn posts -> [timeline | posts] end)}
-
-    # stream_insert dit à LiveView : "Envoie juste ce petit bout de HTML au navigateur"
-    # at: 0 le place tout en haut de la liste (comme sur Twitter)
     {:noreply, stream_insert(socket, :post, timeline, at: 0)}
+  end
+
+  # Cas 2 : Mise à jour (Edit)
+  @impl true
+  def handle_info({:timeline_updated, timeline}, socket) do
+    # stream_insert est intelligent : si l'ID existe déjà, il remplace le contenu !
+    {:noreply, stream_insert(socket, :post, timeline)}
+  end
+
+  # Cas 3 : Suppression (Delete)
+  @impl true
+  def handle_info({:timeline_deleted, timeline}, socket) do
+    # stream_delete va retirer l'élément du DOM chez TOUS les utilisateurs connectés
+    {:noreply, stream_delete(socket, :post, timeline)}
   end
 
   defp list_post() do

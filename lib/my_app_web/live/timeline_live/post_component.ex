@@ -3,7 +3,7 @@ defmodule MyAppWeb.TimelineLive.PostComponent do
 
   def render(assigns) do
       ~H"""
-      <div id={"post-#{@id}"} class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm transition hover:border-blue-300">
+      <div id={"#{@id}"} class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm transition hover:border-blue-300">
         <div class="flex items-start space-x-4">
           <%!-- Avatar --%>
 
