@@ -53,6 +53,7 @@ defmodule MyApp.Post do
     %Timeline{}
     |> Timeline.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:timeline_created)
   end
 
   @doc """
@@ -71,6 +72,16 @@ defmodule MyApp.Post do
     timeline
     |> Timeline.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:timeline_created)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(MyApp.PubSub, "timelines")
+  end
+
+  defp broadcast({:ok, timeline}, event) do
+    Phoenix.PubSub.broadcast(MyApp.PubSub, "timelines", {event, timeline})
+    {:ok, timeline}
   end
 
   @doc """
@@ -87,6 +98,7 @@ defmodule MyApp.Post do
   """
   def delete_timeline(%Timeline{} = timeline) do
     Repo.delete(timeline)
+    |> broadcast(:timeline_created) # On change l'atome ici
   end
 
   @doc """

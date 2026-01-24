@@ -14,11 +14,7 @@ defmodule MyAppWeb.TimelineLive.Form do
       </.header>
 
       <.form for={@form} id="timeline-form" phx-change="validate" phx-submit="save">
-        <.input field={@form[:posts]} type="text" label="Posts" />
-        <.input field={@form[:username]} type="text" label="Username" />
-        <.input field={@form[:body]} type="text" label="Body" />
-        <.input field={@form[:likes_count]} type="number" label="Likes count" />
-        <.input field={@form[:reposts_count]} type="number" label="Reposts count" />
+        <.input field={@form[:body]} type="textarea" label="Body" />
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Timeline</.button>
           <.button navigate={return_path(@return_to, @timeline)}>Cancel</.button>
@@ -76,6 +72,8 @@ defmodule MyAppWeb.TimelineLive.Form do
          |> push_navigate(to: return_path(socket.assigns.return_to, timeline))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        # Si ça échoue, regarde ton terminal, les erreurs seront listées ici :
+        IO.inspect(changeset.errors, label: "ERREURS VALIDATION")
         {:noreply, assign(socket, form: to_form(changeset))}
     end
   end

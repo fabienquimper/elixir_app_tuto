@@ -8,45 +8,35 @@ defmodule MyAppWeb.TimelineLive.Index do
     ~H"""
     <Layouts.app flash={@flash}>
       <.header>
-        Listing Post
+        Timeline
         <:actions>
           <.button variant="primary" navigate={~p"/post/new"}>
-            <.icon name="hero-plus" /> New Timeline
+            <.icon name="hero-plus" /> New Post
           </.button>
         </:actions>
       </.header>
 
-      <.table
-        id="post"
-        rows={@streams.post}
-        row_click={fn {_id, timeline} -> JS.navigate(~p"/post/#{timeline}") end}
-      >
-        <:col :let={{_id, timeline}} label="Posts">{timeline.posts}</:col>
-        <:col :let={{_id, timeline}} label="Username">{timeline.username}</:col>
-        <:col :let={{_id, timeline}} label="Body">{timeline.body}</:col>
-        <:col :let={{_id, timeline}} label="Likes count">{timeline.likes_count}</:col>
-        <:col :let={{_id, timeline}} label="Reposts count">{timeline.reposts_count}</:col>
-        <:action :let={{_id, timeline}}>
-          <div class="sr-only">
-            <.link navigate={~p"/post/#{timeline}"}>Show</.link>
-          </div>
-          <.link navigate={~p"/post/#{timeline}/edit"}>Edit</.link>
-        </:action>
-        <:action :let={{id, timeline}}>
-          <.link
-            phx-click={JS.push("delete", value: %{id: timeline.id}) |> hide("##{id}")}
-            data-confirm="Are you sure?"
-          >
-            Delete
-          </.link>
-        </:action>
-      </.table>
+      <div class="max-w-2xl mx-auto py-8">
+
+
+        <div id="posts" phx-update="stream">
+          <%= for {dom_id, post} <- @streams.post do %>
+            <.live_component
+              module={MyAppWeb.TimelineLive.PostComponent}
+              id={dom_id}
+              post={post}
+            />
+          <% end %>
+        </div>
+      </div>
+
     </Layouts.app>
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Post.subscribe()
     {:ok,
      socket
      |> assign(:page_title, "Listing Post")
@@ -59,6 +49,16 @@ defmodule MyAppWeb.TimelineLive.Index do
     {:ok, _} = Post.delete_timeline(timeline)
 
     {:noreply, stream_delete(socket, :post, timeline)}
+  end
+
+  @impl true
+  def handle_info({:timeline_created, timeline}, socket) do
+      # {:noreply, stream_insert(socket, :post, timeline, at: 0)}
+    # {:noreply, update(socket, :posts, fn posts -> [timeline | posts] end)}
+
+    # stream_insert dit à LiveView : "Envoie juste ce petit bout de HTML au navigateur"
+    # at: 0 le place tout en haut de la liste (comme sur Twitter)
+    {:noreply, stream_insert(socket, :post, timeline, at: 0)}
   end
 
   defp list_post() do
