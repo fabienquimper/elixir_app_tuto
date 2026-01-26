@@ -16,3 +16,9 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 * Docs: https://hexdocs.pm/phoenix
 * Forum: https://elixirforum.com/c/phoenix-forum
 * Source: https://github.com/phoenixframework/phoenix
+
+# Install LM Studio
+
+To chat here http://localhost:4000/chat you need to install LM Studio with the appropriate model (here: openai/gpt-oss-20b). Then activate API endpoint (by default it is here: http://192.168.1.66:1234)
+
+![alt text](<Capture d’écran du 2026-01-26 12-29-37.png>)

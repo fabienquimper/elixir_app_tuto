@@ -22,6 +22,8 @@ defmodule MyAppWeb.Router do
     live "/post/:id", TimelineLive.Show, :show
     live "/post/:id/edit", TimelineLive.Form, :edit
 
+    live "/chat", ChatLive, :index
+
 
     get "/", PageController, :home
   end
