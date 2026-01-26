@@ -30,10 +30,12 @@ defmodule MyApp.ChatGPT do
         {:ok, content}
 
       {:ok, %{status: status, body: error_body}} ->
+        IO.inspect(body, label: "LM STUDIO STATUS ERROR")
         # Handle server-side errors (e.g., model not loaded or wrong parameters)
         {:error, "LM Studio returned status #{status}: #{inspect(error_body)}"}
 
       {:error, exception} ->
+        IO.inspect(exception, label: "NETWORK EXCEPTION")
         # Handle network issues (e.g., wrong IP, port closed, or server offline)
         {:error, "Connection failed: #{inspect(exception)}"}
     end

@@ -52,20 +52,20 @@ defmodule MyAppWeb.TimelineLive.Index do
     {:noreply, stream_delete(socket, :post, timeline)}
   end
 
-  # Cas 1 : Nouveau post (Déjà fait)
+  # Case 1: New post (Already done)
   @impl true
   def handle_info({:timeline_created, timeline}, socket) do
     {:noreply, stream_insert(socket, :post, timeline, at: 0)}
   end
 
-  # Cas 2 : Mise à jour (Edit)
+  # Case 2: Update (Edit)
   @impl true
   def handle_info({:timeline_updated, timeline}, socket) do
     # stream_insert est intelligent : si l'ID existe déjà, il remplace le contenu !
     {:noreply, stream_insert(socket, :post, timeline)}
   end
 
-  # Cas 3 : Suppression (Delete)
+  # Case 3: Delete
   @impl true
   def handle_info({:timeline_deleted, timeline}, socket) do
     # stream_delete va retirer l'élément du DOM chez TOUS les utilisateurs connectés
@@ -76,28 +76,12 @@ defmodule MyAppWeb.TimelineLive.Index do
     Post.list_post()
   end
 
-
-  # Chatbot management
-
-  @impl true
-  def handle_info({:run_chat_query, message}, socket) do
-    parent = self()
-    Task.start(fn ->
-      case MyApp.ChatGPT.ask_question(message) do
-        {:ok, content} ->
-          IO.inspect(content, label: "DEBUG: Raw response of ChatGPT.ask_question")
-          send(parent, {:llm_reply, content})
-        {:error, reason} ->
-          IO.inspect(reason, label: "DEBUG: Error during LM Studio call")
-          send(parent, {:llm_reply, "Error: #{reason}"})
-      end
-    end)
-    {:noreply, socket}
-  end
+  # # Chatbot management
 
   @impl true
-  def handle_info({:llm_reply, reply}, socket) do
-    IO.puts("DEBUG: handle_info :llm_reply reçu dans l'Index")
+  def handle_info({:llm_reply_for_component, reply}, socket) do
+    IO.puts("--> 3. PARENT RECEIVES ANSWER FROM TASK")
+    # We send the reply back to the component via its ID
     send_update(MyAppWeb.ChatComponent, id: "ai-chat-header", reply_from_ai: reply)
     {:noreply, socket}
   end
