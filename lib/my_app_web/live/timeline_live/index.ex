@@ -18,6 +18,7 @@ defmodule MyAppWeb.TimelineLive.Index do
 
       <div class="max-w-2xl mx-auto py-8">
 
+        <.live_component module={MyAppWeb.ChatComponent} id="ai-chat-header" />
 
         <div id="posts" phx-update="stream">
           <%= for {dom_id, post} <- @streams.post do %>
@@ -74,4 +75,31 @@ defmodule MyAppWeb.TimelineLive.Index do
   defp list_post() do
     Post.list_post()
   end
+
+
+  # Chatbot management
+
+  @impl true
+  def handle_info({:run_chat_query, message}, socket) do
+    parent = self()
+    Task.start(fn ->
+      case MyApp.ChatGPT.ask_question(message) do
+        {:ok, content} ->
+          IO.inspect(content, label: "DEBUG: Raw response of ChatGPT.ask_question")
+          send(parent, {:llm_reply, content})
+        {:error, reason} ->
+          IO.inspect(reason, label: "DEBUG: Error during LM Studio call")
+          send(parent, {:llm_reply, "Error: #{reason}"})
+      end
+    end)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:llm_reply, reply}, socket) do
+    IO.puts("DEBUG: handle_info :llm_reply reçu dans l'Index")
+    send_update(MyAppWeb.ChatComponent, id: "ai-chat-header", reply_from_ai: reply)
+    {:noreply, socket}
+  end
+
 end
