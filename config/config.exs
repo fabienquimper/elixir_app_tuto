@@ -60,6 +60,16 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# MCP server configuration (paths and docker image).
+# You can override values with environment variables:
+# - MYAPP_MCP_OAUTH_PATH
+# - MYAPP_MCP_TOKENS_PATH
+# - MYAPP_MCP_DOCKER_IMAGE
+config :my_app, :mcp,
+  docker_image: System.get_env("MYAPP_MCP_DOCKER_IMAGE") || "google-drive-mcp",
+  host_oauth_path: System.get_env("MYAPP_MCP_OAUTH_PATH") || Path.expand("../../google-drive-mcp/gcp-oauth.keys.json", __DIR__),
+  host_tokens_path: System.get_env("MYAPP_MCP_TOKENS_PATH") || Path.expand("../../google-drive-mcp/tokens.json", __DIR__)
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
